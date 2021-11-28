@@ -14,7 +14,6 @@ public/assets/css/ui-grid.*
 /**/node_modules
 .DS_Store
 .env
-.env.*
 .idea
 .vscode/*
 _ide_helper.php

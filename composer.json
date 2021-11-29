@@ -41,7 +41,8 @@
         "dragonmantank/cron-expression": "^3.1",
         "laravel/legacy-factories": "^1.1",
         "fruitcake/laravel-cors": "^2.0",
-        "tigitz/php-spellchecker": "^0.2.1"
+        "tigitz/php-spellchecker": "^0.2.1",
+        "nwidart/laravel-modules": "^8.2"
     },
     "require-dev": {
         "mockery/mockery": "^1.4.2",
@@ -60,7 +61,8 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Modules\\": "App/Modules/"
         },
         "files": [
             "app/Helpers/functions.php"

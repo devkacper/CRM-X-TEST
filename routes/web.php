@@ -5,14 +5,15 @@ use Illuminate\Support\Facades\Route;
 // Render app page
 use Illuminate\Broadcasting\BroadcastController;
 
-$router->get('/', [\App\Http\Controllers\StartController::class, 'getApp']);
-$router->get('/old', [\App\Http\Controllers\StartController::class, 'getAppOld']);
-$router->get('/test', [\App\Http\Controllers\StartController::class, 'getTest']);
+//$router->get('/', [\App\Http\Controllers\StartController::class, 'getApp']);
+//$router->get('/old', [\App\Http\Controllers\StartController::class, 'getAppOld']);
+//$router->get('/test', [\App\Http\Controllers\StartController::class, 'getTest']);
 
 $modules = [
     'Address',
     'CustomerSettings',
     'History',
+    'Importer',
     'Invoice',
     'Person',
     'Service',

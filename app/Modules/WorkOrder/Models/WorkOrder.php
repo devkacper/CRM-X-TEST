@@ -105,7 +105,7 @@ class WorkOrder extends LogModel
     const CREATED_AT = 'created_date';
     const UPDATED_AT = 'modified_date';
 
-    protected $fillable = [];
+    protected $fillable = ['external_id'];
 
     protected static $custPoNumberProvider;
 
@@ -191,6 +191,7 @@ class WorkOrder extends LogModel
             'invoice_number',
             'invoice_status_type_id',
             'not_to_exceed',
+            'external_id',
             'owner_person_id',
             'parts_status_type_id',
             'phone',

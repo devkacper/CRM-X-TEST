@@ -37,11 +37,10 @@ class ImporterController extends Controller
      */
     public function store(FileRequest $request)
     {
-        $file = $request->file('htmlFile');
-        $tmpFile = file_get_contents('../storage/work_orders.html');
+        $file = $request->file('htmlFile')->store('/');
 
         $dom = new Dom();
-        $dom->loadStr($tmpFile);
+        $dom->loadStr(file_get_contents(storage_path('app/local/'.$file)));
 
         $table = $dom->find('#ctl00_ctl00_ContentPlaceHolderMain_MainContent_TicketLists_AllTickets_ctl00')[0];
 
@@ -90,18 +89,23 @@ class ImporterController extends Controller
             }
 
             if($entityID) {
-                $workOrder = new WorkOrder();
-                $workOrder->work_order_number = $ticket;
-                $workOrder->external_id = $entityID;
-                $workOrder->priority = $urgency;
-                $workOrder->received_date = Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s');
-                $workOrder->category = $category;
-                $workOrder->fin_loc = $store;
-                $workOrder->save();
+                if(!WorkOrder::where('external_id', $entityID)->exists()) {
+                    $workOrder = new WorkOrder();
+                    $workOrder->work_order_number = $ticket;
+                    $workOrder->external_id = $entityID;
+                    $workOrder->priority = $urgency;
+                    $workOrder->received_date = Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s');
+                    $workOrder->category = $category;
+                    $workOrder->fin_loc = $store;
+                    $workOrder->save();
+                }
             }
         }
 
         // 4. Store import log in database.
+
+        return redirect()->back()->with('success', 'Import complete! Entries processed: X, Entries created: X');
+
         // 5. Return CSV file with raport of imported data.
 
         // *6. Add console command to import file with the same functionality like in web interface.

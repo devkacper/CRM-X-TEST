@@ -44,7 +44,9 @@ class ImporterController extends Controller
         $dom->loadStr($tmpFile);
 
         $table = $dom->find('#ctl00_ctl00_ContentPlaceHolderMain_MainContent_TicketLists_AllTickets_ctl00')[0];
+
         foreach($table->find('tr') as $tr) {
+
             $entityID = null;
             $ticket = null;
             $rcvdDate = null;
@@ -52,6 +54,7 @@ class ImporterController extends Controller
             $urgency = null;
             $store = null;
             $a = $tr->find('td a')[0];
+
             if($a){
                 $href = $a->getAttribute('href');
                 $tmp = explode('entityid=', $href);
@@ -87,14 +90,14 @@ class ImporterController extends Controller
             }
 
             if($entityID) {
-                WorkOrder::create([
-                    'external_id'       => $entityID,
-                    'work_order_number' => $ticket,
-                    'priority'          => $urgency,
-                    'received_date'     => Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s'),
-                    'category'          => $category,
-                    'fin_loc'           => $store
-                ]);
+                $workOrder = new WorkOrder();
+                $workOrder->work_order_number = $ticket;
+                $workOrder->external_id = $entityID;
+                $workOrder->priority = $urgency;
+                $workOrder->received_date = Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s');
+                $workOrder->category = $category;
+                $workOrder->fin_loc = $store;
+                $workOrder->save();
             }
         }
 

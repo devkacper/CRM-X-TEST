@@ -3,6 +3,7 @@
 namespace App\Modules\Importer\Http\Controllers;
 
 use App\Modules\Importer\Http\Requests\FileRequest;
+use App\Modules\Importer\Models\ImporterLog;
 use App\Modules\WorkOrder\Models\WorkOrder;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -12,6 +13,15 @@ use Illuminate\Support\Carbon;
 
 class ImporterController extends Controller
 {
+    /**
+     * Counters of entries.
+     */
+    public function  __construct()
+    {
+        $this->entriesCreated = 0;
+        $this->entriesProcessed = 0;
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -37,11 +47,14 @@ class ImporterController extends Controller
      */
     public function store(FileRequest $request)
     {
+        // Save requested file in storage directory.
         $file = $request->file('htmlFile')->store('/');
 
+        // Load requested HTML document.
         $dom = new Dom();
         $dom->loadStr(file_get_contents(storage_path('app/local/'.$file)));
 
+        // Get necessary informations from HTML file & store in database.
         $table = $dom->find('#ctl00_ctl00_ContentPlaceHolderMain_MainContent_TicketLists_AllTickets_ctl00')[0];
 
         foreach($table->find('tr') as $tr) {
@@ -90,23 +103,31 @@ class ImporterController extends Controller
 
             if($entityID) {
                 if(!WorkOrder::where('external_id', $entityID)->exists()) {
-                    $workOrder = new WorkOrder();
-                    $workOrder->work_order_number = $ticket;
-                    $workOrder->external_id = $entityID;
-                    $workOrder->priority = $urgency;
-                    $workOrder->received_date = Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s');
-                    $workOrder->category = $category;
-                    $workOrder->fin_loc = $store;
+                    $workOrder                      = new WorkOrder();
+                    $workOrder->work_order_number   = $ticket;
+                    $workOrder->external_id         = $entityID;
+                    $workOrder->priority            = $urgency;
+                    $workOrder->received_date       = Carbon::createFromFormat('d/m/Y', $rcvdDate)->format('Y-m-d H:i:s');
+                    $workOrder->category            = $category;
+                    $workOrder->fin_loc             = $store;
                     $workOrder->save();
+
+                    $this->entriesCreated++;
                 }
+                $this->entriesProcessed++;
             }
         }
 
-        // 4. Store import log in database.
-
-        return redirect()->back()->with('success', 'Import complete! Entries processed: X, Entries created: X');
+        // Store import log in database.
+        $importerLog                    = new ImporterLog();
+        $importerLog->type              = 'Import';
+        $importerLog->run_at            = Carbon::now();
+        $importerLog->entries_created   = $this->entriesCreated;
+        $importerLog->entries_processed = $this->entriesProcessed;
+        $importerLog->save();
 
         // 5. Return CSV file with raport of imported data.
+        return redirect()->back()->with('success', 'Import complete! Entries created: '.$this->entriesCreated.' Entries processed: '.$this->entriesProcessed);
 
         // *6. Add console command to import file with the same functionality like in web interface.
     }

@@ -4,6 +4,8 @@ namespace App\Modules\Importer\Console\Commands;
 
 use App\Modules\Importer\Http\Helpers\ImporterHelper;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 
 class ImportHTMLFile extends Command
 {
@@ -12,7 +14,7 @@ class ImportHTMLFile extends Command
      *
      * @var string
      */
-    protected $signature = 'import:html';
+    protected $signature = 'import:html {--path=}';
 
     /**
      * The console command description.
@@ -38,9 +40,15 @@ class ImportHTMLFile extends Command
      */
     public function handle()
     {
-        $file = 'work_orders.html';
-        $import = ImporterHelper::import($file);
+        try {
+            $filePath   = $this->option('path');
+            $file       = Storage::putFile('/', new File($filePath));
+            $import     = ImporterHelper::import($file);
 
-        echo 'Import complete! Entries created: '.$import['entriesCreated'].' Entries processed: '.$import['entriesProcessed'].PHP_EOL;
+            echo 'Import complete! Entries created: '.$import['entriesCreated'].' Entries processed: '.$import['entriesProcessed'].PHP_EOL;
+        } catch(\Exception $e) {
+            echo 'Sorry, looks like something went wrong.'.PHP_EOL;
+        }
+
     }
 }

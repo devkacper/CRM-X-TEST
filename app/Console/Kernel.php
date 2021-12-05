@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Core\Extended\LoadConfiguration;
 use App\Core\Extended\LoadEnvironmentVariables;
+use App\Modules\Importer\Console\Commands\ImportHTMLFile;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -35,6 +36,7 @@ class Kernel extends ConsoleKernel
         Commands\ModuleMakeMigration::class,
         Commands\ModuleMigrate::class,
         Commands\ModuleSeed::class,
+        ImportHTMLFile::class,
     ];
 
     /**

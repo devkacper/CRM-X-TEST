@@ -14,7 +14,7 @@ class AddImporterLogTable extends Migration
     public function up()
     {
         Schema::create('importer_log', function (Blueprint $table) {
-            $table->bigInteger('id');
+            $table->increments('id');
             $table->string('type');
             $table->dateTime('run_at');
             $table->integer('entries_processed');

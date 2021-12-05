@@ -126,10 +126,38 @@ class ImporterController extends Controller
         $importerLog->entries_processed = $this->entriesProcessed;
         $importerLog->save();
 
-        // 5. Return CSV file with raport of imported data.
-        return redirect()->back()->with('success', 'Import complete! Entries created: '.$this->entriesCreated.' Entries processed: '.$this->entriesProcessed);
+        // Return CSV file with raport of imported data.
+        $csvFileName = str_replace('html', 'csv', $file);
 
-        // *6. Add console command to import file with the same functionality like in web interface.
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$csvFileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('Type', 'Run at', 'Entries created', 'Entries processed');
+
+        $csvFile = fopen(storage_path('app/public/'.$csvFileName), 'w');
+        fputcsv($csvFile, $columns);
+
+        $row['Type'] = $importerLog->type;
+        $row['Run at'] = $importerLog->run_at;
+        $row['Entries created'] = $importerLog->entries_created;
+        $row['Entries processed'] = $importerLog->entries_processed;
+
+        fputcsv($csvFile, array($row['Type'], $row['Run at'], $row['Entries created'], $row['Entries processed']));
+
+        fclose($csvFile);
+
+        return redirect()
+            ->back()
+            ->with([
+                'success' => 'Import complete! Entries created: '.$this->entriesCreated.' Entries processed: '.$this->entriesProcessed,
+                'download' => $csvFileName
+            ]
+        );
     }
 
     /**
